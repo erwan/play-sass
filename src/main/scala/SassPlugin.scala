@@ -34,8 +34,9 @@ object SassPlugin extends Plugin {
           sys.error("OOPS. missing SASS?")
         }
       }
-      // val loadPaths = expand(Seq(sassWorkingDir / "gems")).map(_.getAbsolutePath)
-      val loadPaths = (sassWorkingDir / "gems").listFiles.map(_ / "lib").map(_.getAbsolutePath)
+
+      val rubyPaths = (sassWorkingDir / "gems").listFiles.map(_ / "lib").map(_.getAbsolutePath)
+      val sassPaths = Seq(src / "assets" / "stylesheets").map(_.getAbsolutePath)
 
       // Here `sassWorkingDir` reference a directory containing the whole SASS Stuff, so you can work with it as process resources as usual.
       import java.io._
@@ -66,7 +67,7 @@ object SassPlugin extends Plugin {
           case (sourceFile, name) => {
             if (changedFiles.contains(sourceFile) || dependencies.contains(new File(resources, "public/" + naming(name, false)))) {
               val (debug, min, deps) = try {
-                SassCompiler.compile(sourceFile, loadPaths)
+                SassCompiler.compile(sourceFile, rubyPaths, sassPaths)
               } catch {
                 case e: AssetCompilationException => throw play.Project.reportCompilationError(state, e)
               }
